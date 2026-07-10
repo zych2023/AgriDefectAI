@@ -1,0 +1,56 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# === 虚拟环境 ===
+venv/
+.venv/
+env/
+.env/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Jupyter ===
+.ipynb_checkpoints/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === 数据集（极大，不应入仓） ===
+**/Data/AgriculturalDisease_*/
+
+# === 模型产物（622MB，不入仓，可通过训练脚本重现） ===
+**/checkpoints/*.pth
+**/checkpoints/*.onnx
+**/checkpoints/*.pt
+**/checkpoints/*.png
+
+# === 草稿 / 临时文件 ===
+ceshi.py
+upload_package/
+
+# === 日志 ===
+*.log
+*.out
+
+# === Docker ===
+.docker/
+
+# === 压缩包 ===
+checkpoints.zip
+*.zip
+
+# === 备份 ===
+*.bak

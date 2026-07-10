@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧农业 AI 病虫害识别</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 50%, #fff3e0 100%);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+  .header h1 { font-size: 28px; font-weight: 600; }
+  .header p { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+
+  .container {
+    max-width: 1300px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 450px 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    padding: 24px;
+  }
+  .card h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e8f5e9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 上传区域 */
+  .upload-zone {
+    border: 2px dashed #c8e6c9;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #fafff9;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: #43a047;
+    background: #e8f5e9;
+  }
+  .upload-zone .icon { font-size: 48px; margin-bottom: 12px; }
+  .upload-zone .hint { color: #666; font-size: 14px; }
+  .upload-zone .hint strong { color: #2e7d32; }
+  .upload-zone input { display: none; }
+
+  #preview {
+    margin-top: 16px;
+    text-align: center;
+    display: none;
+  }
+  #preview img {
+    max-width: 100%;
+    max-height: 350px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+  }
+  #preview .btn {
+    margin-top: 12px;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 10px 28px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .btn-primary {
+    background: #43a047;
+    color: white;
+  }
+  .btn-primary:hover { background: #2e7d32; }
+  .btn-primary:disabled {
+    background: #c8e6c9;
+    cursor: not-allowed;
+  }
+
+  /* 加载动画 */
+  .spinner {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    color: #666;
+  }
+  .spinner.active { display: block; }
+  .spinner::before {
+    content: "";
+    display: inline-block;
+    width: 24px; height: 24px;
+    border: 3px solid #c8e6c9;
+    border-top-color: #43a047;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 结果区 */
+  #results { display: none; }
+
+  .top-result {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .confidence-badge {
+    background: #43a047;
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+    padding: 12px 16px;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 90px;
+  }
+  .confidence-badge .pct { font-size: 14px; opacity: 0.9; }
+  .disease-info h3 { font-size: 20px; color: #2e7d32; margin-bottom: 4px; }
+  .disease-info .advice { color: #555; font-size: 14px; margin-top: 6px; line-height: 1.6; }
+  .disease-info .pesticide { color: #e65100; font-size: 13px; margin-top: 4px; }
+
+  /* Top-5 列表 */
+  .top5-list { margin-bottom: 20px; }
+  .top5-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 12px;
+  }
+  .top5-item .rank {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    text-align: center;
+    line-height: 28px;
+    font-size: 13px;
+    color: #999;
+    font-weight: 600;
+  }
+  .top5-item:first-child .rank { background: #43a047; color: white; }
+  .top5-item .name { flex: 1; font-size: 15px; color: #333; }
+  .top5-item .conf {
+    font-weight: 600;
+    color: #2e7d32;
+    font-size: 14px;
+  }
+  .conf-bar {
+    width: 80px; height: 6px;
+    background: #f0f0f0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .conf-bar .fill {
+    height: 100%;
+    background: linear-gradient(90deg, #66bb6a, #43a047);
+    border-radius: 3px;
+  }
+
+  /* 相似样例 */
+  .similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .similar-card {
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .similar-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  .similar-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+  }
+  .similar-card .info {
+    padding: 8px 10px;
+  }
+  .similar-card .info .dis {
+    font-size: 12px;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .similar-card .info .sim {
+    font-size: 12px;
+    color: #43a047;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌾 智慧农业 AI 病虫害识别</h1>
+  <p>上传农作物叶片图片 · 智能识别病害 · 查看相似病例</p>
+</div>
+
+<div class="container">
+  <!-- 左栏：上传 -->
+  <div>
+    <div class="card">
+      <h2>📷 上传图片</h2>
+      <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="icon">🌿</div>
+        <div class="hint">点击上传或拖拽图片到此处<br><strong>支持 JPG / PNG / BMP</strong></div>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/bmp,image/webp" onchange="handleFile(this.files[0])">
+      </div>
+      <div id="preview">
+        <img id="previewImg" src="" alt="预览">
+        <br>
+        <button class="btn btn-primary" id="predictBtn" onclick="predict()">🔍 开始识别</button>
+      </div>
+      <div class="spinner" id="spinner">正在识别中...</div>
+    </div>
+  </div>
+
+  <!-- 右栏：结果 -->
+  <div id="results">
+    <div class="card" style="margin-bottom:24px">
+      <h2>🏆 识别结果</h2>
+      <div id="topResult"></div>
+      <div id="top5List" class="top5-list"></div>
+    </div>
+    <div class="card">
+      <h2>🖼️ 相似病例</h2>
+      <div id="similarGrid" class="similar-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin;
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const preview = document.getElementById('preview');
+const previewImg = document.getElementById('previewImg');
+const predictBtn = document.getElementById('predictBtn');
+const spinner = document.getElementById('spinner');
+const results = document.getElementById('results');
+let selectedFile = null;
+
+// 拖拽上传
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+function handleFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    alert('请选择图片文件');
+    return;
+  }
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    previewImg.src = e.target.result;
+    preview.style.display = 'block';
+    dropZone.style.display = 'none';
+    results.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function predict() {
+  if (!selectedFile) return;
+
+  predictBtn.disabled = true;
+  spinner.classList.add('active');
+  results.style.display = 'none';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    const res = await fetch(API + '/predict', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (!data.success) { alert('识别失败'); return; }
+
+    // 顶部结果
+    const top = data.top_prediction;
+    document.getElementById('topResult').innerHTML = `
+      <div class="top-result">
+        <div class="confidence-badge">
+          ${(top.confidence * 100).toFixed(1)}<span class="pct">%</span>
+        </div>
+        <div class="disease-info">
+          <h3>${top.disease}</h3>
+          ${top.advice ? `<div class="advice">💡 ${top.advice}</div>` : ''}
+          ${top.pesticide && top.pesticide !== '无需用药' ? `<div class="pesticide">🧪 推荐药剂：${top.pesticide}</div>` : ''}
+        </div>
+      </div>`;
+
+    // Top-5 列表
+    document.getElementById('top5List').innerHTML = data.top5.map((item, i) => `
+      <div class="top5-item">
+        <div class="rank">${item.rank}</div>
+        <div class="name">${item.disease}</div>
+        <div class="conf-bar"><div class="fill" style="width:${(item.confidence*100).toFixed(0)}%"></div></div>
+        <div class="conf">${(item.confidence*100).toFixed(1)}%</div>
+      </div>`).join('');
+
+    // 相似病例
+    const simHtml = data.similar_cases && data.similar_cases.length > 0
+      ? data.similar_cases.map(s => `
+        <div class="similar-card" onclick="window.open('${API}${s.image_url}')">
+          <img src="${API}${s.image_url}" alt="${s.disease}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22120%22><rect fill=%22%23f5f5f5%22 width=%22200%22 height=%22120%22/><text x=%22100%22 y=%2265%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2212%22>图片加载失败</text></svg>'">
+          <div class="info">
+            <div class="dis" title="${s.disease}">${s.disease}</div>
+            <div class="sim">${(s.similarity * 100).toFixed(1)}% 相似</div>
+          </div>
+        </div>`).join('')
+      : '<div style="color:#999;text-align:center;padding:20px;">暂无相似病例数据，请先运行 build_index.py 构建特征库</div>';
+
+    document.getElementById('similarGrid').innerHTML = simHtml;
+    results.style.display = 'block';
+
+  } catch (err) {
+    alert('请求失败: ' + err.message);
+  } finally {
+    predictBtn.disabled = false;
+    spinner.classList.remove('active');
+  }
+}
+
+// 支持粘贴图片
+document.addEventListener('paste', e => {
+  const item = e.clipboardData.items[0];
+  if (item && item.type.startsWith('image/')) {
+    handleFile(item.getAsFile());
+  }
+});
+</script>
+</body>
+</html>
