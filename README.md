@@ -12,7 +12,23 @@ AgriDefectAI/
 │   ├── api/             #   推理服务 + Web UI
 │   ├── checkpoints/     #   模型产物
 │   └── docs/            #   训练文档
-├── backend/             # 模块2: 后端服务（待开发）
+├── backend/             # 模块2: 后端服务（FastAPI）
+│   ├── app/
+│   │   ├── main.py      #   应用入口
+│   │   ├── core/        #   基础设施（配置/数据库/安全/缓存）
+│   │   ├── common/      #   通用工具（响应/异常/文件存储）
+│   │   ├── middleware/  #   中间件（请求日志/限流）
+│   │   └── modules/     #   业务模块
+│   │       ├── auth/    #     认证（登录/注册/JWT）
+│   │       ├── disease/ #     病虫害识别（ONNX推理）
+│   │       ├── knowledge/ #   知识库检索
+│   │       ├── agent/   #     种植决策Agent
+│   │       ├── business/ #    业务管理CRUD（农田/作物/病虫害）
+│   │       └── weather/ #     天气查询
+│   ├── migrations/      # Alembic 数据库迁移
+│   ├── uploads/         # 本地文件存储
+│   ├── tests/           # 接口测试
+│   └── scripts/         # 种子数据/管理脚本
 ├── frontend/            # 模块3: 前端界面（待开发）
 ├── rag/                 # 模块4: RAG 知识检索（待开发）
 └── agent/               # 模块5: 智能种植决策 Agent（待开发）
