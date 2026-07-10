@@ -3,13 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.common.response import ApiResponse, PaginatedData
-from app.modules.disease.schemas import FieldPestRecordResponse
+from app.modules.disease.schemas import RecognizeResponse, FieldPestRecordResponse
 from app.modules.disease.service import DiseaseService
 
 router = APIRouter(prefix="/api/v1/disease", tags=["disease"])
 
 
-@router.post("/recognize", response_model=ApiResponse[FieldPestRecordResponse])
+@router.post("/recognize", response_model=ApiResponse)
 async def recognize(
     field_id: int = Query(..., description="Field ID"),
     file: UploadFile = File(...),

@@ -2,18 +2,24 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class RecognizeRequest(BaseModel):
-    field_id: int  # Which field the image is from
-
-
-class RecognizeResult(BaseModel):
-    pest_name: str
-    pest_id: int
-    type: str  # disease, pest, weed
+class PredictionItem(BaseModel):
+    rank: int
+    class_id: int
+    disease: str
     confidence: float
-    severity: str  # mild, moderate, severe
-    description: str
-    prevention: str
+    advice: str = ""
+    pesticide: str = ""
+
+
+class RecognizeResponse(BaseModel):
+    id: int
+    field_id: int
+    pest_id: int
+    detected_at: datetime
+    severity: str
+    top_prediction: PredictionItem
+    top5: list[PredictionItem]
+    notes: str | None = None
 
 
 class FieldPestRecordResponse(BaseModel):
