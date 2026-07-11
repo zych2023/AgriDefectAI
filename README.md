@@ -12,7 +12,23 @@ AgriDefectAI/
 │   ├── api/             #   推理服务 + Web UI
 │   ├── checkpoints/     #   模型产物
 │   └── docs/            #   训练文档
-├── backend/             # 模块2: 后端服务（待开发）
+├── backend/             # 模块2: 后端服务（FastAPI）
+│   ├── app/
+│   │   ├── main.py      #   应用入口
+│   │   ├── core/        #   基础设施（配置/数据库/安全/缓存）
+│   │   ├── common/      #   通用工具（响应/异常/文件存储）
+│   │   ├── middleware/  #   中间件（请求日志/限流）
+│   │   └── modules/     #   业务模块
+│   │       ├── auth/    #     认证（登录/注册/JWT）
+│   │       ├── disease/ #     病虫害识别（ONNX推理）
+│   │       ├── knowledge/ #   知识库检索
+│   │       ├── agent/   #     种植决策Agent
+│   │       ├── business/ #    业务管理CRUD（农田/作物/病虫害）
+│   │       └── weather/ #     天气查询
+│   ├── migrations/      # Alembic 数据库迁移
+│   ├── uploads/         # 本地文件存储
+│   ├── tests/           # 接口测试
+│   └── scripts/         # 种子数据/管理脚本
 ├── frontend/            # 模块3: 前端界面（待开发）
 ├── rag/                 # 模块4: RAG 知识检索（待开发）
 └── agent/               # 模块5: 智能种植决策 Agent（待开发）
@@ -93,10 +109,10 @@ python api/api.py        # 启动推理服务 → http://localhost:8000
 基于**ResNet50**骨干网络，加载ImageNet预训练权重进行迁移学习。分类头替换为Dropout(0.2) + Linear(2048→36)结构。训练策略采用：
 - **AdamW优化器**（lr=3e-4, weight_decay=1e-4）
 - **Cosine学习率衰减 + 2 epoch Warmup**
-- **混合精度训练（AMP）**加速
-- **Label Smoothing（0.05）**缓解细粒度类别过拟合
+- **混合精度训练（AMP）** 加速
+- **Label Smoothing（0.05）** 缓解细粒度类别过拟合
 - **MixUp数据增强**（前20 epoch），增强泛化能力
-- **Early Stop（patience=15）**防止过拟合
+- **Early Stop（patience=15）** 防止过拟合
 
 ### 训练平台
 

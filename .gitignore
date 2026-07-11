@@ -1,56 +1,188 @@
-# === Python ===
+# ==========================
+# Python
+# ==========================
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
 *.egg-info/
 dist/
 build/
 .eggs/
-*.egg
+*.egg-info/
+.eggs/
 
-# === 虚拟环境 ===
+# ==========================
+# 虚拟环境
+# ==========================
 venv/
 .venv/
 env/
 .env/
+ENV/
+.conda
+*/venv/
+*/env/
+*/.venv/
 
-# === IDE ===
+# ==========================
+# IDE 和编辑器
+# ==========================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# === Jupyter ===
-.ipynb_checkpoints/
-
-# === OS ===
 .DS_Store
 Thumbs.db
 
-# === 数据集（极大，不应入仓） ===
-**/Data/AgriculturalDisease_*/
+# ==========================
+# Jupyter Notebook
+# ==========================
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
 
-# === 模型产物（622MB，不入仓，可通过训练脚本重现） ===
+# ==========================
+# 操作系统
+# ==========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================
+# 项目特定：数据集（极大，不应入仓）
+# ==========================
+**/Data/AgriculturalDisease_*/
+**/datasets/
+**/data/raw/
+**/data/processed/
+
+# ==========================
+# 模型产物（体积大，不入仓，可通过训练脚本重现）
+# ==========================
 **/checkpoints/*.pth
 **/checkpoints/*.onnx
 **/checkpoints/*.pt
 **/checkpoints/*.png
+**/checkpoints/*.h5
+**/checkpoints/*.ckpt
+**/checkpoints/*.pb
+*.pth
+*.h5
+*.ckpt
+*.pb
+*.onnx
+*.pt
+*.pkl
+models_data/
+**/models_data/
+**/models/*.pth
+**/models/*.h5
 
-# === 草稿 / 临时文件 ===
+# ==========================
+# 运行时数据（不上传）
+# ==========================
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+**/uploads/
+**/data/
+**/logs/
+logs/
+
+# ==========================
+# 环境变量和敏感配置
+# ==========================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+**/config.yaml
+**/secrets.yaml
+
+# ==========================
+# 草稿 / 临时文件
+# ==========================
 ceshi.py
 upload_package/
+*.tmp
+*.temp
+*.bak
+*.backup
 
-# === 日志 ===
+# ==========================
+# 日志文件
+# ==========================
 *.log
 *.out
+logs/
+**/logs/
 
-# === Docker ===
+# ==========================
+# Docker
+# ==========================
 .docker/
+docker-compose.override.yml
 
-# === 压缩包 ===
+# ==========================
+# 压缩包
+# ==========================
 checkpoints.zip
 *.zip
+*.tar.gz
+*.rar
+*.7z
 
-# === 备份 ===
+# ==========================
+# 备份文件
+# ==========================
 *.bak
+*.backup
+
+# ==========================
+# 前端相关（预留）
+# ==========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+*.local
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.next/
+.umi/
+.cache/
+
+# ==========================
+# 测试和覆盖率
+# ==========================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+test-results/
+coverage/
+*.cover
+*.coverage
+
+# ==========================
+# 数据库迁移缓存
+# ==========================
+migrations/__pycache__/
+migrations/*/__pycache__/
+*/migrations/__pycache__/
+
+# ==========================
+# 其他工具特定
+# ==========================
+.superpowers/
