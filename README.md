@@ -109,10 +109,10 @@ python api/api.py        # 启动推理服务 → http://localhost:8000
 基于**ResNet50**骨干网络，加载ImageNet预训练权重进行迁移学习。分类头替换为Dropout(0.2) + Linear(2048→36)结构。训练策略采用：
 - **AdamW优化器**（lr=3e-4, weight_decay=1e-4）
 - **Cosine学习率衰减 + 2 epoch Warmup**
-- **混合精度训练（AMP）**加速
-- **Label Smoothing（0.05）**缓解细粒度类别过拟合
+- **混合精度训练（AMP）** 加速
+- **Label Smoothing（0.05）** 缓解细粒度类别过拟合
 - **MixUp数据增强**（前20 epoch），增强泛化能力
-- **Early Stop（patience=15）**防止过拟合
+- **Early Stop（patience=15）** 防止过拟合
 
 ### 训练平台
 
