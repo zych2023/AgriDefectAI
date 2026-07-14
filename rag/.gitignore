@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# 运行时生成
+qa_history.db
+
+# 下载的模型文件（约 2.2GB）
+models/
+
+# IDE
+.idea/
+.vscode/

@@ -6,32 +6,47 @@
 
 ```
 AgriDefectAI/
-├── model-training/      # 模块1: 模型训练（ResNet50 36类病害分类）
-│   ├── models/          #   模型定义
-│   ├── Data/            #   数据集加载
-│   ├── api/             #   推理服务 + Web UI
-│   ├── checkpoints/     #   模型产物
-│   └── docs/            #   训练文档
-├── backend/             # 模块2: 后端服务（FastAPI）
+├── model-training/        # 模块1: 模型训练（ResNet50 36类病害分类）
+│   ├── models/            #   模型定义
+│   ├── Data/              #   数据集（as_dataset 包）
+│   ├── api/               #   推理服务 + Web UI
+│   ├── checkpoints/       #   模型产物
+│   └── docs/              #   训练文档与汇报材料
+│
+├── backend/               # 模块2: 后端服务（FastAPI）
 │   ├── app/
-│   │   ├── main.py      #   应用入口
-│   │   ├── core/        #   基础设施（配置/数据库/安全/缓存）
-│   │   ├── common/      #   通用工具（响应/异常/文件存储）
-│   │   ├── middleware/  #   中间件（请求日志/限流）
-│   │   └── modules/     #   业务模块
-│   │       ├── auth/    #     认证（登录/注册/JWT）
-│   │       ├── disease/ #     病虫害识别（ONNX推理）
-│   │       ├── knowledge/ #   知识库检索
-│   │       ├── agent/   #     种植决策Agent
-│   │       ├── business/ #    业务管理CRUD（农田/作物/病虫害）
-│   │       └── weather/ #     天气查询
-│   ├── migrations/      # Alembic 数据库迁移
-│   ├── uploads/         # 本地文件存储
-│   ├── tests/           # 接口测试
-│   └── scripts/         # 种子数据/管理脚本
-├── frontend/            # 模块3: 前端界面（待开发）
-├── rag/                 # 模块4: RAG 知识检索（待开发）
-└── agent/               # 模块5: 智能种植决策 Agent（待开发）
+│   │   ├── main.py        #   应用入口
+│   │   ├── core/          #   基础设施（配置 / 数据库 / 安全 / Redis）
+│   │   ├── common/        #   通用工具（响应 / 异常 / 文件存储）
+│   │   └── modules/       #   业务模块（每模块含 router / service / schemas / models）
+│   │       ├── auth/      #     认证（登录 / 注册 / JWT）
+│   │       ├── disease/   #     病虫害识别（ONNX 推理）
+│   │       ├── knowledge/ #     知识库检索
+│   │       ├── agent/     #     种植决策 Agent
+│   │       └── business/  #     业务管理 CRUD（农田 / 作物 / 病虫害）
+│   ├── migrations/        # Alembic 数据库迁移
+│   ├── seed_pests.py      # 病虫害种子数据
+│   └── task.md            # 开发任务文档
+│
+├── rag/                   # 模块3: RAG 知识检索（已完成）
+│   ├── data/              #   农业知识资料（PDF / DOCX / TXT，约 30 份）
+│   ├── models/            #   精排模型（BGE-Reranker-v2-m3）
+│   ├── main.py            #   知识库构建 + 交互式问答（6 步管线含进度条）
+│   ├── api_server.py      #   FastAPI 服务（/ask /retrieve /health）
+│   ├── config.py          #   全局配置（LLM / Embedding / Milvus / 检索参数）
+│   ├── document_loader.py #   多格式文档加载（PDF / DOCX / TXT）
+│   ├── chunker.py         #   语义分块 + 兜底截断 + MD5 去重标识
+│   ├── maas_embedding.py  #   阿里云 MaaS Embedding 封装
+│   ├── milvus_client.py   #   Milvus 混合检索客户端（双向量索引 + 去重插入）
+│   ├── retriever.py       #   混合检索（稠密 + 稀疏）+ RRF 融合
+│   ├── reranker.py        #   Cross-Encoder 精排（可降级）
+│   ├── query_expander.py  #   LLM 查询扩展
+│   ├── generator.py       #   LLM 流式生成 + 引用标注
+│   ├── qa_logger.py       #   SQLite 问答历史记录
+│   └── API_DOC.md         #   HTTP API 完整调用文档
+│
+├── frontend/              # 模块4: 前端界面（待开发）
+└── agent/                 # 模块5: 智能种植决策 Agent（待开发）
 ```
 
 ## 🚀 快速开始
@@ -48,6 +63,30 @@ python api/api.py        # 启动推理服务 → http://localhost:8000
 ```
 
 详见 [`model-training/README.md`](model-training/README.md)
+
+### RAG 知识检索
+
+```bash
+# 1. 启动 Milvus 向量数据库（Docker）
+docker run -d --name milvus-standalone \
+  -e ETCD_USE_EMBED=true \
+  -e ETCD_DATA_DIR=/var/lib/milvus/etcd \
+  -e COMMON_STORAGETYPE=local \
+  -p 19530:19530 -p 9091:9091 \
+  milvusdb/milvus:v2.5.4 milvus run standalone
+
+# 2. 安装依赖
+cd rag
+pip install -r requirements.txt
+
+# 3. 构建知识库（含进度条，约 3~8 分钟）
+python main.py --ingest-only
+
+# 4. 启动 API 服务 → http://127.0.0.1:8899/docs
+python api_server.py
+```
+
+详见 [`rag/README.md`](rag/README.md)
 
 ---
 
@@ -184,6 +223,7 @@ python api/api.py        # 启动推理服务 → http://localhost:8000
 - [x] Web拖拽上传可视化界面
 - [x] ONNX模型导出，支持昇腾端侧部署
 - [x] 混合精度训练、MixUp增强、Early Stop等工程化训练策略
+- [x] RAG 知识检索模块（语义分块 + 混合检索 + RRF 融合 + 精排）
 
 ### 相比传统方案的优势
 
