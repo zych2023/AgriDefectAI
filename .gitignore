@@ -92,7 +92,7 @@ uploads/
 *.sqlite
 *.sqlite3
 **/uploads/
-**/data/
+**/data/**
 !rag/data/.gitkeep
 **/logs/
 logs/

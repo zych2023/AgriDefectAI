@@ -1,0 +1,2 @@
+# 此目录存放农业知识资料文件（PDF / DOCX / TXT）
+# 将文件放入此目录后运行 python main.py --ingest-only 构建知识库
